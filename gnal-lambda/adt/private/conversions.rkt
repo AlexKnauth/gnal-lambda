@@ -4,6 +4,7 @@
          rkt->natural natural->rkt
          rkt->bit bit->rkt
          rkt->byte byte->rkt
+         rkt->byte-string byte-string->rkt
          )
 
 (require racket/match
@@ -13,6 +14,7 @@
            (file "../../../λ/private/boolean.rkt")
            (file "../../../λ/private/byte.rkt")
            (file "../../../λ/private/natural.rkt")
+           (file "../../../λ/private/byte-string.rkt")
            )))
 
 (module+ test
@@ -80,6 +82,31 @@
 
 (define natural->rkt
   (-natural->rkt 0 add1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Byte-String
+
+(define (rkt->byte-string bstr)
+  (define n (bytes-length bstr))
+  (for/fold ([acc -empty-byte-string])
+            ([i (in-range n)])
+    (define b (bytes-ref bstr (- n i 1)))
+    (-byte-string-append (-byte-string1 (rkt->byte b)) acc)))
+
+(define (build-bytes n proc)
+  (define bs (make-bytes n))
+  (for ([i (in-range n)])
+    (bytes-set! bs i (proc i)))
+  bs)
+
+(define byte-string->rkt
+  (-byte-string->rkt
+   byte->rkt
+   natural->rkt
+   rkt->natural
+   build-bytes
+   (λ (i) (error 'byte-string->rkt "bad index: ~v" i))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -157,5 +184,20 @@
       (check-equal? (natural->rkt (-+ -a -b)) (+ a b))
       (check-equal? (natural->rkt (-* -a -b)) (* a b))
       (check-equal? (natural->rkt (-^ -a -b)) (expt a b)))
+    )
+  (test-case "byte-strings"
+    (check-equal? (byte-string->rkt (rkt->byte-string #"")) #"")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"a")) #"a")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"b")) #"b")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"c")) #"c")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"abc")) #"abc")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"abcdefg")) #"abcdefg")
+    (check-equal? (byte-string->rkt (rkt->byte-string #"FROGGY!")) #"FROGGY!")
+    (for* ([a (in-list (list #"dog" #"cat" #"mouse" #"FROGGY!"))]
+           [b (in-list (list #"dog" #"cat" #"mouse" #"FROGGY!"))])
+      (define -a (rkt->byte-string a))
+      (define -b (rkt->byte-string b))
+      (check-equal? (byte-string->rkt (-byte-string-append -a -b))
+                    (bytes-append a b)))
     )
   )
