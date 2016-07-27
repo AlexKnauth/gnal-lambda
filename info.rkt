@@ -1,6 +1,6 @@
 #lang info
 
-(define collection 'mluti)
+(define collection 'multi)
 
 (define deps
   '("base"

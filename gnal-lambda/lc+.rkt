@@ -1,8 +1,6 @@
 #lang racket/base
 
-(provide define define-adt match-adt (all-from-out "lc.rkt"))
+(provide (all-from-out "lc/adt.rkt"))
 
-(require "lc.rkt"
-         "define.rkt"
-         "adt.rkt")
+(require "lc/adt.rkt")
 
