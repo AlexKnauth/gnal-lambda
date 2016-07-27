@@ -1,1 +1,1 @@
-#lang s-exp syntax/module-reader gnal-lambda
+#lang s-exp syntax/module-reader gnal-lambda/lc
