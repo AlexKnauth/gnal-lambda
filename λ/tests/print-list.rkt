@@ -1,11 +1,7 @@
 #lang gnal λ/io
 
-(require "../../gnal-lambda/show-adt.rkt")
-
-(define a-byte
-  (byte (1-bit) (0-bit) (0-bit) (0-bit) (0-bit) (1-bit) (1-bit) (0-bit)))
-(define b-byte
-  (byte (0-bit) (1-bit) (0-bit) (0-bit) (0-bit) (1-bit) (1-bit) (0-bit)))
+(require "../../gnal-lambda/show-adt.rkt"
+         "../byte.rkt")
 
 ;; A (Listof A) is one of:
 ;;  - (empty)
@@ -14,25 +10,19 @@
   (empty)
   (cons first rest))
 
-(define show-list
-  (λ (show-element)
+(define show-List
+  (λ (show-A)
     (show-adt List
       (empty)
-      (cons show-element (show-list show-element)))))
+      (cons show-A (show-List show-A)))))
 
-(define show-bit
-  (λ (b)
-    (b
-     (λ () (byte-string1 a-byte))
-     (λ () (byte-string1 b-byte)))))
-
-(define print-list
-  (λ (show-element)
+(define print-List
+  (λ (show-A)
     (λ (lst)
-      (display-byte-string ((show-list show-element) lst)))))
+      (display-byte-string ((show-List show-A) lst)))))
 
 (define print-listof-bit
-  (print-list show-bit))
+  (print-List show-Bit))
 
 (print-listof-bit (empty))
 (print-listof-bit (cons (0-bit) (empty)))

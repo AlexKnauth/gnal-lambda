@@ -1,12 +1,8 @@
 #lang racket/base
 
 (provide io-pure io-bind display-byte-string io-begin
-         0-bit 1-bit byte
-         empty-byte-string byte-string1 byte-string-append
-         )
+         (all-from-out "byte-string.rkt"))
 
 (require (file "../λ/private/io.rkt")
-         (file "../λ/private/byte.rkt")
-         (file "../λ/private/byte-string.rkt")
-         )
+         "byte-string.rkt")
 

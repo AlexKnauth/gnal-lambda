@@ -2,11 +2,12 @@
 
 (provide show-adt)
 
-(require "lc/io.rkt"
+(require "adt.rkt"
+         "byte-string.rkt"
          (for-syntax racket/base
                      syntax/parse
                      syntax/stx
-                     "io.rkt"
+                     "byte-string.rkt"
                      "adt/private/conversions.rkt"
                      ))
 
