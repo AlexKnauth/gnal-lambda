@@ -18,7 +18,8 @@
            )))
 
 (module+ test
-  (require rackunit))
+  (require (only-in rackunit test-case check-equal?)
+           (submod ".." testing-forms)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -112,7 +113,15 @@
 
 ;; Tests
 
-(module+ test
+(module* testing-forms #f
+  (provide check-boolean=?
+           check-true
+           check-false
+           check-bit=?
+           check-byte=?
+           check-natural=?
+           )
+  (require (only-in rackunit define-check define-binary-check))
   (define-binary-check (check-boolean=? actual expected)
     (boolean->rkt (-boolean=? actual expected)))
   (define-check (check-true v)
@@ -125,7 +134,9 @@
     (boolean->rkt (-byte=? actual expected)))
   (define-binary-check (check-natural=? actual expected)
     (boolean->rkt (-natural=? actual expected)))
+  )
 
+(module+ test
   (test-case "booleans"
     (check-equal? (boolean->rkt (rkt->boolean #true)) #true)
     (check-equal? (boolean->rkt (rkt->boolean #false)) #false)
