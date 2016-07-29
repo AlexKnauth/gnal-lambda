@@ -46,7 +46,19 @@
   (lambda (stx)
     (syntax-parse stx
       [(unique-id)
-       #:with internal-id (generate-temporary 'unique-id)
+       #:do [(define stuff
+               (list (syntax-source stx)
+                     (syntax-line stx)
+                     (syntax-column stx)
+                     (syntax-position stx)
+                     (syntax-span stx)
+                     (syntax-debug-info stx)
+                     (syntax-local-name)
+                     (syntax-local-context)
+                     (syntax-local-phase-level)))]
+       #:with internal-id
+       (generate-temporary
+        (format-id #f "unique-id~a~a" (equal-hash-code stuff) (equal-secondary-hash-code stuff)))
        #'(unique-id/symbol 'internal-id)])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
