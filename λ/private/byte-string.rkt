@@ -3,10 +3,12 @@
 ;; these byte strings should be thought of as opaque
 (provide empty-byte-string byte-string1 byte-string-append
          byte-string-length byte-string-ref
+         byte-string=?
          ;; private
          byte-string->rkt)
 
-(require "byte.rkt"
+(require "boolean.rkt"
+         "byte.rkt"
          "natural.rkt"
          "maybe.rkt"
          )
@@ -54,6 +56,22 @@
          [(zero) (some first)]
          [(succ i-1)
           (byte-string-ref rest i-1)])])))
+
+;; byte-string=? : Byte-String Byte-String -> Boolean
+(define byte-string=?
+  (λ (bstr1 bstr2)
+    (match-adt Byte-String bstr1
+      [(make-empty-byte-string)
+       (match-adt Byte-String bstr2
+         [(make-empty-byte-string) (true)]
+         [(cons-byte-string b2 bstr2) (false)])]
+      [(cons-byte-string b1 bstr1)
+       (match-adt Byte-String bstr2
+         [(make-empty-byte-string) (false)]
+         [(cons-byte-string b2 bstr2)
+          (match-adt Boolean (byte=? b1 b2)
+            [(true) (byte-string=? bstr1 bstr2)]
+            [(false) (false)])])])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
