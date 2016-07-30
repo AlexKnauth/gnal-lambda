@@ -10,6 +10,7 @@
          (only-in racket/set seteq set-add set-member?)
          (for-syntax racket/base
                      racket/syntax
+                     syntax/name
                      syntax/parse
                      ))
 (module+ test
@@ -42,20 +43,48 @@
 (define (unique-id/symbol sym)
   (unique-id/internal (unique-id-internal-state sym)))
 
+(begin-for-syntax
+  (define -syntax-debug-info
+    (dynamic-require 'racket/base 'syntax-debug-info (λ () (λ (stx) stx))))
+  
+  (struct syntax-stuff
+    (source line column position span debug-info name context phase-level e)
+    #:transparent)
+  (define (get-syntax-stuff stx)
+    (cond [(syntax? stx)
+           (syntax-stuff (syntax-source stx)
+                         (syntax-line stx)
+                         (syntax-column stx)
+                         (syntax-position stx)
+                         (syntax-span stx)
+                         (-syntax-debug-info stx)
+                         (syntax-local-infer-name stx)
+                         (syntax-local-context)
+                         (syntax-local-phase-level)
+                         (get-syntax-stuff (syntax-e stx)))]
+          [(null? stx) stx]
+          [(boolean? stx) stx]
+          [(symbol? stx) stx]
+          [(string? stx) stx]
+          [(bytes? stx) stx]
+          [(regexp? stx) stx]
+          [(pair? stx) (cons (get-syntax-stuff (car stx))
+                             (get-syntax-stuff (cdr stx)))]
+          [(vector? stx) (list->vector (get-syntax-stuff (vector->list stx)))]
+          [(box? stx) (box-immutable (get-syntax-stuff (unbox stx)))]
+          [(hash? stx)
+           (cond [(hash-equal? stx) (make-immutable-hash (get-syntax-stuff (hash->list stx)))]
+                 [(hash-eqv? stx) (make-immutable-hasheqv (get-syntax-stuff (hash->list stx)))]
+                 [(hash-eq? stx) (make-immutable-hasheq (get-syntax-stuff (hash->list stx)))]
+                 [else #false])]
+          [else #false]))
+  )
+
 (define-syntax unique-id
   (lambda (stx)
     (syntax-parse stx
       [(unique-id)
-       #:do [(define stuff
-               (list (syntax-source stx)
-                     (syntax-line stx)
-                     (syntax-column stx)
-                     (syntax-position stx)
-                     (syntax-span stx)
-                     (syntax-debug-info stx)
-                     (syntax-local-name)
-                     (syntax-local-context)
-                     (syntax-local-phase-level)))]
+       #:do [(define stuff (get-syntax-stuff stx))]
        #:with internal-id
        (generate-temporary
         (format-id #f "unique-id~a~a" (equal-hash-code stuff) (equal-secondary-hash-code stuff)))
