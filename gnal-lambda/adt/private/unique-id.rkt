@@ -52,7 +52,7 @@
                      (syntax-column stx)
                      (syntax-position stx)
                      (syntax-span stx)
-                     ;(syntax-debug-info stx) ; requires Racket version 6.3 or later
+                     (syntax-debug-info stx)
                      (syntax-local-name)
                      (syntax-local-context)
                      (syntax-local-phase-level)))]
