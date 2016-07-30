@@ -3,7 +3,7 @@
 (define collection 'multi)
 
 (define deps
-  '("base"
+  '(["base" #:version "6.1.1"]
     "gnal-lang"
     ))
 
