@@ -48,7 +48,7 @@
 
 (define Listof
   (λ (A)
-    (type-implements
+    (interp
       (trait-impl Functor
         [map map-List])
       (trait-impl Equal

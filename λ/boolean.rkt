@@ -13,7 +13,7 @@
   (show-adt Boolean (true) (false)))
 
 (define Boolean-τ
-  (type-implements
+  (interp
     (trait-impl Show
       [show show-Boolean])
     (trait-impl Equal

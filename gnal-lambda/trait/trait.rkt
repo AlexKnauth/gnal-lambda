@@ -1,7 +1,7 @@
 #lang racket/base
 
 (provide define-trait
-         type-implements
+         interp
          trait-impl
          )
 
@@ -52,9 +52,9 @@
               [(make-trait-impl x ...) x])))
         ...)]))
 
-(define-syntax type-implements
+(define-syntax interp
   (syntax-parser #:literals (trait-impl)
-    [(type-implements
+    [(interp
        (~and impl (trait-impl trait:id [x:id x-impl:expr] ...))
        ...)
      #'(λ (given-trait-internal)

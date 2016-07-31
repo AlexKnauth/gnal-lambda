@@ -18,14 +18,14 @@
     (byte show-Bit show-Bit show-Bit show-Bit show-Bit show-Bit show-Bit show-Bit)))
 
 (define Bit-τ
-  (type-implements
+  (interp
     (trait-impl Show
       [show show-Bit])
     (trait-impl Equal
       [equal? bit=?])))
 
 (define Byte-τ
-  (type-implements
+  (interp
     (trait-impl Show
       [show show-Byte])
     (trait-impl Equal
