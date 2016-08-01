@@ -11,7 +11,8 @@
     (write-bytes (displayed-byte-string-bstr this) out)))
 
 (define (run-io/current-print old-printer)
+  (define (begin a b) b)
   (define (write-bytes bstr)
     (old-printer (displayed-byte-string bstr)))
-  (run-io write-bytes byte-string->rkt))
+  (run-io void begin write-bytes byte-string->rkt))
 

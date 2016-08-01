@@ -55,11 +55,13 @@
 ;; private
 
 (define run-io
-  (λ (write-bytes byte-string->rkt)
+  (λ (void begin write-bytes byte-string->rkt)
     (λ (io-v)
       (match-adt IO io-v
         [(io-pure v)
-         (write-bytes (byte-string->rkt empty-byte-string))]
-        [(with-byte-string-out bstr v)
-         (write-bytes (byte-string->rkt bstr))]))))
+         (void)]
+        [(with-byte-string-out bstr next-io)
+         (begin
+           (write-bytes (byte-string->rkt bstr))
+           ((run-io void begin write-bytes byte-string->rkt) next-io))]))))
 
