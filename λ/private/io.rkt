@@ -19,25 +19,29 @@
 (define-adt Unit
   (void))
 
+
+;; An (IO A) is one of:
+;;  - (io-pure A)
+;;  - (with-byte-string-out Byte-String (IO A))
 ;; TODO: support user input
 (define-adt IO
-  (with-byte-string-out val bstr))
-
-(define io-pure
-  (λ (v)
-    (with-byte-string-out v empty-byte-string)))
+  (io-pure v)
+  (with-byte-string-out bstr io-v))
 
 (define io-bind
   (λ (io-v next)
     (match-adt IO io-v
-      [(with-byte-string-out v1 bstr1)
-       (match-adt IO (next v1)
-         [(with-byte-string-out v2 bstr2)
-          (with-byte-string-out v2 (byte-string-append bstr1 bstr2))])])))
+      [(io-pure v) (next v)]
+      [(with-byte-string-out bstr1 v1)
+       (match-adt IO (io-bind v1 next)
+         [(io-pure v2)
+          (with-byte-string-out bstr1 (io-pure v2))]
+         [(with-byte-string-out bstr2 v2)
+          (with-byte-string-out (byte-string-append bstr1 bstr2) v2)])])))
 
 (define display-byte-string
   (λ (bstr)
-    (with-byte-string-out (void) bstr)))
+    (with-byte-string-out bstr (io-pure (void)))))
 
 (define io-begin
   (λ (io1 io2)
@@ -54,6 +58,8 @@
   (λ (write-bytes byte-string->rkt)
     (λ (io-v)
       (match-adt IO io-v
-        [(with-byte-string-out v bstr)
+        [(io-pure v)
+         (write-bytes (byte-string->rkt empty-byte-string))]
+        [(with-byte-string-out bstr v)
          (write-bytes (byte-string->rkt bstr))]))))
 
