@@ -25,3 +25,8 @@
 
 (print (Listof Bit-τ) ((map (Listof Bit-τ)) flip-bit (cons (0-bit) (cons (1-bit) (empty)))))
 
+(io-bind
+ (read-byte-string-line)
+ (λ (bstr)
+   (display-byte-string (byte-string-append bstr bstr))))
+
