@@ -15,7 +15,6 @@
            (file "../../../λ/private/byte.rkt")
            (file "../../../λ/private/natural.rkt")
            (file "../../../λ/private/byte-string.rkt")
-           (file "../../../λ/private/vector.rkt")
            )))
 
 (module+ test
