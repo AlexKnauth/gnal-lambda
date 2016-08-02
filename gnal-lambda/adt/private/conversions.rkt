@@ -15,6 +15,7 @@
            (file "../../../λ/private/byte.rkt")
            (file "../../../λ/private/natural.rkt")
            (file "../../../λ/private/byte-string.rkt")
+           (file "../../../λ/private/vector.rkt")
            )))
 
 (module+ test
@@ -194,8 +195,11 @@
       (define -b (rkt->natural b))
       (check-equal? (natural->rkt (-+ -a -b)) (+ a b))
       (check-equal? (natural->rkt (-* -a -b)) (* a b))
-      (check-equal? (natural->rkt (-^ -a -b)) (expt a b)))
-    )
+      (check-equal? (natural->rkt (-^ -a -b)) (expt a b))
+      (when (not (zero? b))
+        (check-equal? (natural->rkt (-quotient -a -b)) (quotient a b))
+        (check-equal? (natural->rkt (-remainder -a -b)) (remainder a b)))
+      ))
   (test-case "byte-strings"
     (check-equal? (byte-string->rkt (rkt->byte-string #"")) #"")
     (check-equal? (byte-string->rkt (rkt->byte-string #"a")) #"a")

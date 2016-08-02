@@ -4,6 +4,7 @@
          apply-n-times
          add1 + * ^
          ?sub1 ?∆
+         quotient remainder
          n0 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10
          ;; private
          natural->rkt)
@@ -91,6 +92,22 @@
         (?sub1 b)
         (λ (b-1)
           (?∆ a-1 b-1)))])))
+
+;; quotient : Natural Natural -> Natural
+(define quotient
+  (λ (m n)
+    (match-adt Maybe (?∆ n m)
+      [(none) n0]
+      [(some n∆m)
+       (add1 (quotient n∆m n))])))
+
+;; remainder : Natural Natural -> Natural
+(define remainder
+  (λ (m n)
+    (match-adt Maybe (?∆ n m)
+      [(none) m]
+      [(some n∆m)
+       (remainder n∆m n)])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
