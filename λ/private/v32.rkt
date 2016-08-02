@@ -1,8 +1,8 @@
 #lang gnal λ/adt
 
-(provide V32 v32 v32-nth v32-set-nth v32-update-nth)
+(provide V32 v32 v32-nth v32-set-nth v32-update-nth v32=?)
 
-(require "natural.rkt")
+(require "boolean.rkt" "natural.rkt")
 
 ;; A (V32of A) is a
 ;; (v32 A A A A A A A A A A A A A A A A
@@ -221,4 +221,77 @@
 (define v32-update-nth
   (λ (v i f)
     (v32-set-nth v i (f (v32-nth v i)))))
+
+;; v32=? : [A A -> Boolean] -> [(V32of A) (V32of A) -> Boolean]
+(define v32=?
+  (λ (elem=?)
+    (λ (a b)
+      (match-adt V32 a
+        [(v32 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14 a15
+              a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31)
+         (match-adt V32 b
+           [(v32 b00 b01 b02 b03 b04 b05 b06 b07 b08 b09 b10 b11 b12 b13 b14 b15
+                 b16 b17 b18 b19 b20 b21 b22 b23 b24 b25 b26 b27 b28 b29 b30 b31)
+            (match-adt Boolean (elem=? a00 b00) [(true)
+            (match-adt Boolean (elem=? a01 b01) [(true)
+            (match-adt Boolean (elem=? a02 b02) [(true)
+            (match-adt Boolean (elem=? a03 b03) [(true)
+            (match-adt Boolean (elem=? a04 b04) [(true)
+            (match-adt Boolean (elem=? a05 b05) [(true)
+            (match-adt Boolean (elem=? a06 b06) [(true)
+            (match-adt Boolean (elem=? a07 b07) [(true)
+            (match-adt Boolean (elem=? a08 b08) [(true)
+            (match-adt Boolean (elem=? a09 b09) [(true)
+            (match-adt Boolean (elem=? a10 b10) [(true)
+            (match-adt Boolean (elem=? a11 b11) [(true)
+            (match-adt Boolean (elem=? a12 b12) [(true)
+            (match-adt Boolean (elem=? a13 b13) [(true)
+            (match-adt Boolean (elem=? a14 b14) [(true)
+            (match-adt Boolean (elem=? a15 b15) [(true)
+            (match-adt Boolean (elem=? a16 b16) [(true)
+            (match-adt Boolean (elem=? a17 b17) [(true)
+            (match-adt Boolean (elem=? a18 b18) [(true)
+            (match-adt Boolean (elem=? a19 b19) [(true)
+            (match-adt Boolean (elem=? a20 b20) [(true)
+            (match-adt Boolean (elem=? a21 b21) [(true)
+            (match-adt Boolean (elem=? a22 b22) [(true)
+            (match-adt Boolean (elem=? a23 b23) [(true)
+            (match-adt Boolean (elem=? a24 b24) [(true)
+            (match-adt Boolean (elem=? a25 b25) [(true)
+            (match-adt Boolean (elem=? a26 b26) [(true)
+            (match-adt Boolean (elem=? a27 b27) [(true)
+            (match-adt Boolean (elem=? a28 b28) [(true)
+            (match-adt Boolean (elem=? a29 b29) [(true)
+            (match-adt Boolean (elem=? a30 b30) [(true) (elem=? a31 b31)]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])]
+              [(false) (false)])])]))))
 
