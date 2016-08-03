@@ -1,6 +1,7 @@
 #lang gnal λ/adt
 
-(provide V32 v32 make-v32 v32-nth v32-set-nth v32-update-nth v32=?)
+(provide V32 v32 make-v32 make-v32/1 make-v32/2
+         v32-nth v32-set-nth v32-update-nth v32=?)
 
 (require "boolean.rkt" "natural.rkt")
 
@@ -16,6 +17,18 @@
   (λ (a)
     (v32 a a a a a a a a a a a a a a a a
          a a a a a a a a a a a a a a a a)))
+
+;; make-v32/1 : A A -> (V32of A)
+(define make-v32/1
+  (λ (a b)
+    (v32 a b b b b b b b b b b b b b b b
+         b b b b b b b b b b b b b b b b)))
+
+;; make-v32/2 : A A A -> (V32of A)
+(define make-v32/2
+  (λ (a b c)
+    (v32 a b c c c c c c c c c c c c c c
+         c c c c c c c c c c c c c c c c)))
 
 ;; v32-nth : (V32of A) Natural -> A
 (define v32-nth
