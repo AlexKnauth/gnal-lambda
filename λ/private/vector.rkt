@@ -3,6 +3,8 @@
 ;; A functional vector library inspired by Alexis King's data/pvector library.
 
 (provide empty-vector
+         make-vector
+         build-vector
          ;; Equal
          vector=?
          ;; Countable
@@ -231,6 +233,18 @@
       [(vector-internal length node)
        (vector-internal (add1 length) (vnode-conj length node a))])))
 
+;; TODO
+;; make-vector : Natural A -> (Vectorof A)
+(define make-vector
+  (λ (n v)
+    (build-vector n (λ (i) v))))
+
+;; build-vector : Natural [Natural -> A] -> (Vectorof A)
+(define build-vector
+  (λ (n f)
+    (vector-internal n
+      (build-vnode/acc n f n0 ???))))
+
 ;; vector=? : [A A -> Boolean] -> [(Vectorof A) (Vector A) -> Boolean]
 (define vector=?
   (λ (elem=?)
@@ -307,6 +321,17 @@
                   (v32-nth tail ir)]
                  [(false)
                   (v32-nth (vnode-nth lq sub iq) ir)]))])])])))
+
+;; build-vnode/acc : Natural [Natural -> A] Natural (VNodeof A depth)
+;; i must be less than or equal to n
+(define build-vnode/acc
+  (λ (n f i tree)
+    (match-adt Boolean (natural=? n i)
+      [(true) tree]
+      [(false)
+       (build-vnode/acc n f
+         (add1 i)
+         (vnode-conj i tree (f i)))])))
 
 ;; vnode-elems=? : [A A -> Boolean] (VNodeof A d) (VNodeof A d) Natural Natural -> Boolean
 ;; a and b must both be vnodes for vectors of length n
