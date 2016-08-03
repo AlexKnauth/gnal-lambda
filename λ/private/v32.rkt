@@ -1,7 +1,7 @@
 #lang gnal λ/adt
 
 (provide V32 v32 make-v32 make-v32/1 make-v32/2
-         v32-nth v32-set-nth v32-update-nth v32=?)
+         v32-nth v32-set-nth v32-update-nth v32-conj v32=?)
 
 (require "boolean.rkt" "natural.rkt")
 
@@ -240,6 +240,11 @@
 (define v32-update-nth
   (λ (v i f)
     (v32-set-nth v i (f (v32-nth v i)))))
+
+;; v32-conj : Natural (V32of A) A -> (V32of A)
+(define v32-conj
+  (λ (length v a)
+    (v32-set-nth v length a)))
 
 ;; v32=? : [A A -> Boolean] -> [(V32of A) (V32of A) -> Boolean]
 (define v32=?
