@@ -16,6 +16,7 @@
            (file "../../../λ/private/natural.rkt")
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
+           (file "../../../λ/private/vector.rkt")
            )))
 
 (module+ test
@@ -87,6 +88,21 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Vector
+
+(define ((rkt->vector rkt->elem) v)
+  (for/fold ([acc -empty-vector])
+            ([a (in-vector v)])
+    (-vector-conj acc (rkt->elem a))))
+
+(define ((vector->rkt elem->rkt) v)
+  (vector->immutable-vector
+   (build-vector (natural->rkt (-vector-length v))
+                 (λ (i)
+                   (elem->rkt (-vector-nth v (rkt->natural i)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; Byte-String
 
 (define (rkt->byte-string bstr)
@@ -121,8 +137,10 @@
            check-bit=?
            check-byte=?
            check-natural=?
+           check-vector=?
            )
-  (require (only-in rackunit define-check define-binary-check))
+  (require (only-in rackunit define-check define-binary-check
+                    with-check-info* make-check-actual make-check-expected))
   (define-binary-check (check-boolean=? actual expected)
     (boolean->rkt (-boolean=? actual expected)))
   (define-check (check-true v)
@@ -135,6 +153,12 @@
     (boolean->rkt (-byte=? actual expected)))
   (define-binary-check (check-natural=? actual expected)
     (boolean->rkt (-natural=? actual expected)))
+  (define-check (check-vector=? elem=? actual expected)
+    (with-check-info*
+     (list (make-check-actual actual)
+           (make-check-expected expected))
+     (λ ()
+       (check-true ((-vector=? elem=?) actual expected)))))
   )
 
 (module+ test
@@ -236,5 +260,29 @@
                             (-1-bit) (-0-bit) (-0-bit) (-0-bit) (-0-bit) (-0-bit) (-0-bit) (-0-bit)
                             (-0-bit) (-0-bit) (-1-bit) (-0-bit) (-0-bit) (-0-bit) (-1-bit) (-1-bit)))
                      (-false))
+    )
+  (test-case "vectors"
+    (check-vector=? -natural=? -empty-vector -empty-vector)
+    (check-vector=? -natural=? (-vector-conj -empty-vector -n0) (-vector-conj -empty-vector -n0))
+    (check-vector=? (compose rkt->boolean equal?)
+                    (-vector-conj -empty-vector 0)
+                    (-vector-conj -empty-vector 0))
+    (check-equal? ((vector->rkt natural->rkt) -empty-vector)
+                  (vector-immutable))
+    (check-equal? ((vector->rkt natural->rkt) (-vector-conj -empty-vector -n0))
+                  (vector-immutable 0))
+    (check-vector=? -natural=?
+                    ((rkt->vector rkt->natural) (vector-immutable))
+                    -empty-vector)
+    (check-vector=? -natural=?
+                    ((rkt->vector rkt->natural) (vector-immutable 0))
+                    (-vector-conj -empty-vector -n0))
+    (for ([n (in-list (list 31 33 63 65 1023 1025 2049))])
+      (define v (build-vector n (λ (i) (random n))))
+      (define -v ((rkt->vector (λ (x) x)) v))
+      (for ([i (in-range n)])
+        (define natural-i (rkt->natural i))
+        (check-equal? (-vector-nth -v natural-i)
+                      (vector-ref v i))))
     )
   )
