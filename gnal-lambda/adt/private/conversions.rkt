@@ -107,11 +107,9 @@
 ;; Byte-String
 
 (define (rkt->byte-string bstr)
-  (define n (bytes-length bstr))
   (for/fold ([acc -empty-byte-string])
-            ([i (in-range n)])
-    (define b (bytes-ref bstr (- n i 1)))
-    (-byte-string-append (-byte-string1 (rkt->byte b)) acc)))
+            ([b (in-bytes bstr)])
+    (-byte-string-append acc (-byte-string1 (rkt->byte b)))))
 
 (define (build-bytes n proc)
   (define bs (make-bytes n))

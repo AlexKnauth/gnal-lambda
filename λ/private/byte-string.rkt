@@ -11,67 +11,38 @@
          "byte.rkt"
          "natural.rkt"
          "maybe.rkt"
+         "vector.rkt"
          )
 
-;; TODO:
-;;   implement byte-strings in terms of persistent vectors
-
-;; DON'T PROVIDE THIS `Byte-String` TYPE!
-;; OR EVEN ANYTHING FROM IT!
-(define-adt Byte-String
-  (make-empty-byte-string)
-  (cons-byte-string first rest))
+;; A Byte-String is a (Vectorof Byte)
 
 ;; empty-byte-string : Byte-String
-(define empty-byte-string (make-empty-byte-string))
+(define empty-byte-string empty-vector)
 
 ;; byte-string1 : Byte -> Byte-String
 (define byte-string1
   (λ (b)
-    (cons-byte-string b empty-byte-string)))
+    (make-vector n1 b)))
 
 ;; byte-string-append : Byte-String Byte-String -> Byte-String
-(define byte-string-append
-  (λ (bstr1 bstr2)
-    (match-adt Byte-String bstr1
-      [(make-empty-byte-string) bstr2]
-      [(cons-byte-string first rest)
-       (cons-byte-string first (byte-string-append rest bstr2))])))
+(define byte-string-append vector-append)
 
 ;; byte-string-length : Byte-String -> Natural
-(define byte-string-length
-  (λ (bstr)
-    (match-adt Byte-String bstr
-      [(make-empty-byte-string) n0]
-      [(cons-byte-string first rest)
-       (add1 (byte-string-length rest))])))
+(define byte-string-length vector-length)
 
 ;; byte-string-ref : Byte-String Natural -> (Maybe Byte)
 (define byte-string-ref
   (λ (bstr i)
-    (match-adt Byte-String bstr
-      [(make-empty-byte-string) (none)]
-      [(cons-byte-string first rest)
-       (match-adt Natural i
-         [(zero) (some first)]
-         [(succ i-1)
-          (byte-string-ref rest i-1)])])))
+    (match-adt Maybe (?∆ i (vector-length bstr))
+      [(none) (none)]
+      [(some i∆n)
+       (match-adt Natural i∆n
+         [(zero) (none)]
+         [(succ i∆n-1)
+          (some (vector-nth bstr i))])])))
 
 ;; byte-string=? : Byte-String Byte-String -> Boolean
-(define byte-string=?
-  (λ (bstr1 bstr2)
-    (match-adt Byte-String bstr1
-      [(make-empty-byte-string)
-       (match-adt Byte-String bstr2
-         [(make-empty-byte-string) (true)]
-         [(cons-byte-string b2 bstr2) (false)])]
-      [(cons-byte-string b1 bstr1)
-       (match-adt Byte-String bstr2
-         [(make-empty-byte-string) (false)]
-         [(cons-byte-string b2 bstr2)
-          (match-adt Boolean (byte=? b1 b2)
-            [(true) (byte-string=? bstr1 bstr2)]
-            [(false) (false)])])])))
+(define byte-string=? (vector=? byte=?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

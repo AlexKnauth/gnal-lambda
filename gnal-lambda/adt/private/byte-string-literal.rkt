@@ -15,8 +15,8 @@
   (lambda (stx)
     (syntax-parse stx
       [(bytes-string-append* a:expr) #'a]
-      [(bytes-string-append* a:expr b:expr ...+)
-       #'(byte-string-append a (byte-string-append* b ...))])))
+      [(bytes-string-append* a:expr ...+ b:expr)
+       #'(byte-string-append (byte-string-append* a ...) b)])))
 
 (define-syntax byte-string-literal/id
   (lambda (stx)
