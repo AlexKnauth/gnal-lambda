@@ -31,15 +31,7 @@
 (define byte-string-length vector-length)
 
 ;; byte-string-ref : Byte-String Natural -> (Maybe Byte)
-(define byte-string-ref
-  (λ (bstr i)
-    (match-adt Maybe (?∆ i (vector-length bstr))
-      [(none) (none)]
-      [(some i∆n)
-       (match-adt Natural i∆n
-         [(zero) (none)]
-         [(succ i∆n-1)
-          (some (vector-nth bstr i))])])))
+(define byte-string-ref vector-ref)
 
 ;; byte-string=? : Byte-String Byte-String -> Boolean
 (define byte-string=? (vector=? byte=?))

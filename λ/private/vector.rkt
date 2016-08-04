@@ -13,11 +13,13 @@
          vector-conj
          ;; Sequence
          vector-nth
+         vector-ref
          ;vector-set-nth
          vector-append
          )
 
 (require "boolean.rkt"
+         "maybe.rkt"
          "natural.rkt"
          "v32.rkt"
          )
@@ -227,6 +229,19 @@
       [(vector-internal length node)
        (vnode-nth length node i)])))
 
+;; vector-ref : (Vectorof A) Natural -> (Maybe Byte)
+(define vector-ref
+  (λ (v i)
+    (match-adt Vector v
+      [(vector-internal n tree)
+       (match-adt Maybe (?∆ i n)
+         [(none) (none)]
+         [(some i∆n)
+          (match-adt Natural i∆n
+            [(zero) (none)]
+            [(succ i∆n-1)
+             (some (vnode-nth n tree i))])])])))
+
 ;; vector-conj : (Vectorof A) A -> (Vectorof A)
 (define vector-conj
   (λ (v a)
@@ -234,7 +249,6 @@
       [(vector-internal length node)
        (vector-internal (add1 length) (vnode-conj length node a))])))
 
-;; TODO
 ;; make-vector : Natural A -> (Vectorof A)
 (define make-vector
   (λ (n v)
