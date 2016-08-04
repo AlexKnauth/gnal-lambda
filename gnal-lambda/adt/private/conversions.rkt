@@ -21,6 +21,7 @@
 
 (module+ test
   (require (only-in rackunit test-case check-equal?)
+           (only-in racket/vector vector-append)
            (submod ".." testing-forms)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -277,11 +278,15 @@
     (check-vector=? -natural=?
                     ((rkt->vector rkt->natural) (vector-immutable 0))
                     (-vector-conj -empty-vector -n0))
-    (for ([n (in-list (list 31 33 63 65 1023 1025 2049))])
+    (for ([n (in-list (list 31 33 63 65 1023 1025))])
       (define -n (rkt->natural n))
       (define v (build-vector n (λ (i) (random n))))
       (define v1 ((rkt->vector (λ (x) x)) v))
       (define v2 (-build-vector -n (λ (i) (vector-ref v (natural->rkt i)))))
+      (check-vector=? (compose rkt->boolean equal?) v1 v2)
+      (check-vector=? (compose rkt->boolean equal?)
+                      (-vector-append v2 v2)
+                      ((rkt->vector (λ (x) x)) (vector-append v v)))
       (for ([i (in-range n)])
         (define natural-i (rkt->natural i))
         (check-equal? (-vector-nth v1 natural-i)

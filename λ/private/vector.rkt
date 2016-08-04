@@ -14,6 +14,7 @@
          ;; Sequence
          vector-nth
          ;vector-set-nth
+         vector-append
          )
 
 (require "boolean.rkt"
@@ -245,6 +246,16 @@
     (vector-internal n
       (build-vnode/acc n f n0 ???))))
 
+;; vector-append : (Vectorof A) (Vectorof A) -> (Vectorof A)
+(define vector-append
+  (λ (a b)
+    (match-adt Vector a
+      [(vector-internal a-len a-tree)
+       (match-adt Vector b
+         [(vector-internal b-len b-tree)
+          (vector-internal (+ a-len b-len)
+            (vnode-append/acc a-len a-tree n0 b-len b-tree))])])))
+
 ;; vector=? : [A A -> Boolean] -> [(Vectorof A) (Vector A) -> Boolean]
 (define vector=?
   (λ (elem=?)
@@ -332,6 +343,19 @@
        (build-vnode/acc n f
          (add1 i)
          (vnode-conj i tree (f i)))])))
+
+;; vnode-append/acc : Natural (VNodeof A a-depth) Natural Natural (VNodeof A b-depth) -> (VNodeof A ab-depth)
+(define vnode-append/acc
+  (λ (a-len a-tree i b-len b-tree)
+    (match-adt Boolean (natural=? i b-len)
+      [(true) a-tree]
+      [(false)
+       (vnode-append/acc
+        (add1 a-len)
+        (vnode-conj a-len a-tree (vnode-nth b-len b-tree i))
+        (add1 i)
+        b-len
+        b-tree)])))
 
 ;; vnode-elems=? : [A A -> Boolean] (VNodeof A d) (VNodeof A d) Natural Natural -> Boolean
 ;; a and b must both be vnodes for vectors of length n
