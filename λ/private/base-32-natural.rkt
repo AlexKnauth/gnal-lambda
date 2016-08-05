@@ -11,8 +11,9 @@
          d24 d25 d26 d27 d28 d29 d30 d31
          d01?
          Natural natural=?
-         zero nat-cons
+         zero nat-cons zero?
          + add1
+         ?∆ ?sub1
          quotient32
          remainder32
          remainder32->digit
@@ -24,6 +25,7 @@
          )
 
 (require "boolean.rkt"
+         "maybe.rkt"
          "byte.rkt")
 
 ;; a base-32 digit
@@ -531,6 +533,61 @@
            (λ (ab0 ab-carry)
              (nat-cons ab0
                (+/carry a-rest b-rest ab-carry))))])])))
+
+;; ?∆ : Natural Natural -> (Maybe Natural)
+;; (?∆ a b) contains b - a when a < b, none otherwise
+(define ?∆
+  (λ (a b)
+    (match-adt Maybe (?sub1 a)
+      [(none)
+       (some b)]
+      [(some a-1)
+       (opt-bind
+        (?sub1 b)
+        (λ (b-1)
+          (?∆ a-1 b-1)))])))
+
+;; ?sub1 : Natural -> (Maybe Natural)
+(define ?sub1
+  (λ (a)
+    (match-adt Natural a
+      [(zero) (none)]
+      [(nat-cons a0 ar)
+       (match-adt Digit a0
+         [(d00of32) (match-adt Maybe (?sub1 ar)
+                      [(none) (none)]
+                      [(some ar-1) (some (nat-cons d31 ar-1))])]
+         [(d01of32) (some (nat-cons d00 ar))]
+         [(d02of32) (some (nat-cons d01 ar))]
+         [(d03of32) (some (nat-cons d02 ar))]
+         [(d04of32) (some (nat-cons d03 ar))]
+         [(d05of32) (some (nat-cons d04 ar))]
+         [(d06of32) (some (nat-cons d05 ar))]
+         [(d07of32) (some (nat-cons d06 ar))]
+         [(d08of32) (some (nat-cons d07 ar))]
+         [(d09of32) (some (nat-cons d08 ar))]
+         [(d10of32) (some (nat-cons d09 ar))]
+         [(d11of32) (some (nat-cons d10 ar))]
+         [(d12of32) (some (nat-cons d11 ar))]
+         [(d13of32) (some (nat-cons d12 ar))]
+         [(d14of32) (some (nat-cons d13 ar))]
+         [(d15of32) (some (nat-cons d14 ar))]
+         [(d16of32) (some (nat-cons d15 ar))]
+         [(d17of32) (some (nat-cons d16 ar))]
+         [(d18of32) (some (nat-cons d17 ar))]
+         [(d19of32) (some (nat-cons d18 ar))]
+         [(d20of32) (some (nat-cons d19 ar))]
+         [(d21of32) (some (nat-cons d20 ar))]
+         [(d22of32) (some (nat-cons d21 ar))]
+         [(d23of32) (some (nat-cons d22 ar))]
+         [(d24of32) (some (nat-cons d23 ar))]
+         [(d25of32) (some (nat-cons d24 ar))]
+         [(d26of32) (some (nat-cons d25 ar))]
+         [(d27of32) (some (nat-cons d26 ar))]
+         [(d28of32) (some (nat-cons d27 ar))]
+         [(d29of32) (some (nat-cons d28 ar))]
+         [(d30of32) (some (nat-cons d29 ar))]
+         [(d31of32) (some (nat-cons d30 ar))])])))
 
 (define full-adder
   (λ (a b c)
