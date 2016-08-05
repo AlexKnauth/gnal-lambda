@@ -17,6 +17,7 @@
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
            (file "../../../λ/private/vector.rkt")
+           (prefix-in b32- (file "../../../λ/private/base-32-natural.rkt"))
            )))
 
 (module+ test
@@ -86,6 +87,46 @@
 
 (define natural->rkt
   (-natural->rkt 0 add1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Base 32 Natural
+
+(define (rkt->b32-digit d)
+  (match d
+    [00 -b32-d00] [01 -b32-d01] [02 -b32-d02] [03 -b32-d03]
+    [04 -b32-d04] [05 -b32-d05] [06 -b32-d06] [07 -b32-d07]
+    [08 -b32-d08] [09 -b32-d09] [10 -b32-d00] [11 -b32-d11]
+    [12 -b32-d12] [13 -b32-d13] [14 -b32-d14] [15 -b32-d15]
+    [16 -b32-d16] [17 -b32-d17] [18 -b32-d18] [19 -b32-d19]
+    [20 -b32-d20] [21 -b32-d21] [22 -b32-d22] [23 -b32-d23]
+    [24 -b32-d24] [25 -b32-d25] [26 -b32-d26] [27 -b32-d27]
+    [28 -b32-d28] [29 -b32-d29] [30 -b32-d30] [31 -b32-d31]))
+
+(define (b32-digit->rkt d)
+  (d (λ () 00) (λ () 01) (λ () 02) (λ () 03)
+     (λ () 04) (λ () 05) (λ () 06) (λ () 07)
+     (λ () 08) (λ () 09) (λ () 10) (λ () 11)
+     (λ () 12) (λ () 13) (λ () 14) (λ () 15)
+     (λ () 16) (λ () 17) (λ () 18) (λ () 19)
+     (λ () 20) (λ () 21) (λ () 22) (λ () 23)
+     (λ () 24) (λ () 25) (λ () 26) (λ () 27)
+     (λ () 28) (λ () 29) (λ () 30) (λ () 31)))
+
+(define (rkt->b32-natural n)
+  (unless (exact-nonnegative-integer? n)
+    (error 'rkt->natural "expected a racket natural number, given ~v" n))
+  (let loop ([acc -b32-n0] [n n])
+    (cond [(zero? n) acc]
+          [else (loop (-b32-add1 acc) (sub1 n))])))
+
+(define (b32-natural->rkt n)
+  (let loop ([sum 0] [place 1] [n n])
+    (n (λ () sum)
+       (λ (d rest)
+         (loop (+ sum (* place (b32-digit->rkt d)))
+               (* place 32)
+               rest)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -216,12 +257,15 @@
            [b (in-range 6)])
       (define -a (rkt->natural a))
       (define -b (rkt->natural b))
+      (define -b32-a (rkt->b32-natural a))
+      (define -b32-b (rkt->b32-natural b))
       (check-equal? (natural->rkt (-+ -a -b)) (+ a b))
       (check-equal? (natural->rkt (-* -a -b)) (* a b))
       (check-equal? (natural->rkt (-^ -a -b)) (expt a b))
       (when (not (zero? b))
         (check-equal? (natural->rkt (-quotient -a -b)) (quotient a b))
         (check-equal? (natural->rkt (-remainder -a -b)) (remainder a b)))
+      (check-equal? (b32-natural->rkt (-b32-+ -b32-a -b32-b)) (+ a b))
       ))
   (test-case "byte-strings"
     (check-equal? (byte-string->rkt (rkt->byte-string #"")) #"")
