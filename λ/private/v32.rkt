@@ -1,9 +1,11 @@
 #lang gnal λ/adt
 
 (provide V32 v32 make-v32 make-v32/1 make-v32/2
-         v32-nth v32-set-nth v32-update-nth v32-conj v32=?)
+         v32-nth v32-set-nth v32-update-nth
+         v32-nth/digit v32-set-nth/digit v32-update-nth/digit v32-conj/digit
+         v32=?)
 
-(require "boolean.rkt" "natural.rkt")
+(require "boolean.rkt" "base-32-natural.rkt")
 
 ;; A (V32of A) is a
 ;; (v32 A A A A A A A A A A A A A A A A
@@ -30,221 +32,118 @@
     (v32 a b c c c c c c c c c c c c c c
          c c c c c c c c c c c c c c c c)))
 
-;; v32-nth : (V32of A) Natural -> A
-(define v32-nth
+;; v32-nth/digit : (V32of A) Digit -> A
+(define v32-nth/digit
   (λ (v i)
     (match-adt V32 v
       [(v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
             s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)
-       (match-adt Natural i [(zero) s00]
-      [(succ i)
-       (match-adt Natural i [(zero) s01]
-      [(succ i)
-       (match-adt Natural i [(zero) s02]
-      [(succ i)
-       (match-adt Natural i [(zero) s03]
-      [(succ i)
-       (match-adt Natural i [(zero) s04]
-      [(succ i)
-       (match-adt Natural i [(zero) s05]
-      [(succ i)
-       (match-adt Natural i [(zero) s06]
-      [(succ i)
-       (match-adt Natural i [(zero) s07]
-      [(succ i)
-       (match-adt Natural i [(zero) s08]
-      [(succ i)
-       (match-adt Natural i [(zero) s09]
-      [(succ i)
-       (match-adt Natural i [(zero) s10]
-      [(succ i)
-       (match-adt Natural i [(zero) s11]
-      [(succ i)
-       (match-adt Natural i [(zero) s12]
-      [(succ i)
-       (match-adt Natural i [(zero) s13]
-      [(succ i)
-       (match-adt Natural i [(zero) s14]
-      [(succ i)
-       (match-adt Natural i [(zero) s15]
-      [(succ i)
-       (match-adt Natural i [(zero) s16]
-      [(succ i)
-       (match-adt Natural i [(zero) s17]
-      [(succ i)
-       (match-adt Natural i [(zero) s18]
-      [(succ i)
-       (match-adt Natural i [(zero) s19]
-      [(succ i)
-       (match-adt Natural i [(zero) s20]
-      [(succ i)
-       (match-adt Natural i [(zero) s21]
-      [(succ i)
-       (match-adt Natural i [(zero) s22]
-      [(succ i)
-       (match-adt Natural i [(zero) s23]
-      [(succ i)
-       (match-adt Natural i [(zero) s24]
-      [(succ i)
-       (match-adt Natural i [(zero) s25]
-      [(succ i)
-       (match-adt Natural i [(zero) s26]
-      [(succ i)
-       (match-adt Natural i [(zero) s27]
-      [(succ i)
-       (match-adt Natural i [(zero) s28]
-      [(succ i)
-       (match-adt Natural i [(zero) s29]
-      [(succ i)
-       (match-adt Natural i [(zero) s30]
-      [(succ i)
-       (match-adt Natural i [(zero) s31]
-      [(succ i) s00])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])))
+       (match-adt Digit i
+         [(d00of32) s00] [(d01of32) s01] [(d02of32) s02] [(d03of32) s03]
+         [(d04of32) s04] [(d05of32) s05] [(d06of32) s06] [(d07of32) s07]
+         [(d08of32) s08] [(d09of32) s09] [(d10of32) s10] [(d11of32) s11]
+         [(d12of32) s12] [(d13of32) s13] [(d14of32) s14] [(d15of32) s15]
+         [(d16of32) s16] [(d17of32) s17] [(d18of32) s18] [(d19of32) s19]
+         [(d20of32) s20] [(d21of32) s21] [(d22of32) s22] [(d23of32) s23]
+         [(d24of32) s24] [(d25of32) s25] [(d26of32) s26] [(d27of32) s27]
+         [(d28of32) s28] [(d29of32) s29] [(d30of32) s30] [(d31of32) s31])])))
 
-;; v32-set-nth : (V32of A) Natural A -> (V32of A)
-(define v32-set-nth
+;; v32-set-nth/digit : (V32of A) Digit A -> (V32of A)
+(define v32-set-nth/digit
   (λ (v i a)
     (match-adt V32 v
       [(v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
             s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)
-       (match-adt Natural i
-         [(zero) (v32 a s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 a s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 a s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 a s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 a s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 a s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 a s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 a s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 a s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 a s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 a s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 a s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 a s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 a s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 a s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 a
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      a s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 a s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 a s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 a s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 a s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 a s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 a s23 s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 a s24 s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 a s25 s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 a s26 s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 a s27 s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 a s28 s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 a s29 s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 a s30 s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 a s31)]
-      [(succ i)
-       (match-adt Natural i
-         [(zero) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
-                      s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 a)]
-      [(succ i) v])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])])))
+       (match-adt Digit i
+         [(d00of32) (v32 a s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d01of32) (v32 s00 a s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d02of32) (v32 s00 s01 a s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d03of32) (v32 s00 s01 s02 a s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d04of32) (v32 s00 s01 s02 s03 a s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d05of32) (v32 s00 s01 s02 s03 s04 a s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d06of32) (v32 s00 s01 s02 s03 s04 s05 a s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d07of32) (v32 s00 s01 s02 s03 s04 s05 s06 a s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d08of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 a s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d09of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 a s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d10of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 a s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d11of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 a s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d12of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 a s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d13of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 a s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d14of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 a s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d15of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 a
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d16of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         a s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d17of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 a s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d18of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 a s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d19of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 a s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d20of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 a s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d21of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 a s22 s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d22of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 a s23 s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d23of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 a s24 s25 s26 s27 s28 s29 s30 s31)]
+         [(d24of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 a s25 s26 s27 s28 s29 s30 s31)]
+         [(d25of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 a s26 s27 s28 s29 s30 s31)]
+         [(d26of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 a s27 s28 s29 s30 s31)]
+         [(d27of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 a s28 s29 s30 s31)]
+         [(d28of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 a s29 s30 s31)]
+         [(d29of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 a s30 s31)]
+         [(d30of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 a s31)]
+         [(d31of32) (v32 s00 s01 s02 s03 s04 s05 s06 s07 s08 s09 s10 s11 s12 s13 s14 s15
+                         s16 s17 s18 s19 s20 s21 s22 s23 s24 s25 s26 s27 s28 s29 s30 a)])])))
+
+;; v32-update-nth/digit : (V32of A) Digit [A -> B] -> (V32of B)
+(define v32-update-nth/digit
+  (λ (v i f)
+    (v32-set-nth/digit v i (f (v32-nth/digit v i)))))
+
+;; v32-nth : (V32of A) Natural -> A
+(define v32-nth
+  (λ (v i)
+    (v32-nth/digit v (remainder32->digit i))))
+
+;; v32-set-nth : (V32of A) Natural A -> (V32of A)
+(define v32-set-nth
+  (λ (v i a)
+    (v32-set-nth/digit v (remainder32->digit i) a)))
 
 ;; v32-update-nth : (V32of A) Natural [A -> B] -> (V32of B)
 (define v32-update-nth
   (λ (v i f)
-    (v32-set-nth v i (f (v32-nth v i)))))
+    (v32-update-nth/digit v (remainder32->digit i) f)))
 
 ;; v32-conj : Natural (V32of A) A -> (V32of A)
-(define v32-conj
+(define v32-conj/digit
   (λ (length v a)
-    (v32-set-nth v length a)))
+    (v32-set-nth/digit v length a)))
 
 ;; v32=? : [A A -> Boolean] -> [(V32of A) (V32of A) -> Boolean]
 (define v32=?

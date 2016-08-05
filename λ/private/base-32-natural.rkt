@@ -1,6 +1,7 @@
 #lang gnal λ/adt
 
 (provide Digit digit=?
+         ?digit-sub1
          d00of32 d01of32 d02of32 d03of32 d04of32 d05of32 d06of32 d07of32
          d08of32 d09of32 d10of32 d11of32 d12of32 d13of32 d14of32 d15of32
          d16of32 d17of32 d18of32 d19of32 d20of32 d21of32 d22of32 d23of32
@@ -43,7 +44,22 @@
   (λ (a)
     (match-adt Natural a
       [(zero) (true)]
-      [(nat-cons a0 a-rest) (false)])))
+      [(nat-cons a0 ar) (false)])))
+
+(define zero?*
+  (λ (a)
+    (match-adt Natural a
+      [(zero) (true)]
+      [(nat-cons a0 ar)
+       (match-adt Boolean (d00? a0)
+         [(true) (zero?* ar)]
+         [(false) (false)])])))
+
+(define nat-cons*
+  (λ (1s-digit rest)
+    (match-adt Boolean (and (d00? 1s-digit) (zero?* rest))
+      [(true) n0]
+      [(false) (nat-cons 1s-digit rest)])))
 
 (define natural=?
   (λ (a b)
@@ -511,28 +527,40 @@
     (match-adt Natural a
       [(zero) n0]
       [(nat-cons a0 a-rest)
-       (nat-cons a0 n0)])))
+       (nat-cons* a0 n0)])))
 
 ;; remainder32->digit : Natural -> Digit
 (define remainder32->digit
   (λ (a)
     (match-adt Natural a
       [(zero) d00]
-      [(nat-cons a0 a-rest) a0])))
+      [(nat-cons a0 ar) a0])))
 
 ;; +/carry : Natural Natural Digit -> Natural
 (define +/carry
   (λ (a b carry)
     (match-adt Natural a
-      [(zero) b]
-      [(nat-cons a0 a-rest)
+      [(zero) (+/digit b carry)]
+      [(nat-cons a0 ar)
        (match-adt Natural b
-         [(zero) a]
-         [(nat-cons b0 b-rest)
+         [(zero) (+/digit a carry)]
+         [(nat-cons b0 br)
           ((full-adder a0 b0 carry)
            (λ (ab0 ab-carry)
-             (nat-cons ab0
-               (+/carry a-rest b-rest ab-carry))))])])))
+             (nat-cons* ab0
+               (+/carry ar br ab-carry))))])])))
+
+;; +/digit : Natural Digit -> Natural
+(define +/digit
+  (λ (a d)
+    (match-adt Natural a
+      [(zero) (nat-cons* d n0)]
+      [(nat-cons a0 ar)
+       ((half-adder a0 d)
+        (λ (ad0 ad-carry)
+          (match-adt Bit ad-carry
+            [(0-bit) (nat-cons* ad0 ar)]
+            [(1-bit) (nat-cons ad0 (+/digit ar d01))])))])))
 
 ;; ?∆ : Natural Natural -> (Maybe Natural)
 ;; (?∆ a b) contains b - a when a < b, none otherwise
@@ -553,42 +581,52 @@
     (match-adt Natural a
       [(zero) (none)]
       [(nat-cons a0 ar)
-       (match-adt Digit a0
-         [(d00of32) (match-adt Maybe (?sub1 ar)
-                      [(none) (none)]
-                      [(some ar-1) (some (nat-cons d31 ar-1))])]
-         [(d01of32) (some (nat-cons d00 ar))]
-         [(d02of32) (some (nat-cons d01 ar))]
-         [(d03of32) (some (nat-cons d02 ar))]
-         [(d04of32) (some (nat-cons d03 ar))]
-         [(d05of32) (some (nat-cons d04 ar))]
-         [(d06of32) (some (nat-cons d05 ar))]
-         [(d07of32) (some (nat-cons d06 ar))]
-         [(d08of32) (some (nat-cons d07 ar))]
-         [(d09of32) (some (nat-cons d08 ar))]
-         [(d10of32) (some (nat-cons d09 ar))]
-         [(d11of32) (some (nat-cons d10 ar))]
-         [(d12of32) (some (nat-cons d11 ar))]
-         [(d13of32) (some (nat-cons d12 ar))]
-         [(d14of32) (some (nat-cons d13 ar))]
-         [(d15of32) (some (nat-cons d14 ar))]
-         [(d16of32) (some (nat-cons d15 ar))]
-         [(d17of32) (some (nat-cons d16 ar))]
-         [(d18of32) (some (nat-cons d17 ar))]
-         [(d19of32) (some (nat-cons d18 ar))]
-         [(d20of32) (some (nat-cons d19 ar))]
-         [(d21of32) (some (nat-cons d20 ar))]
-         [(d22of32) (some (nat-cons d21 ar))]
-         [(d23of32) (some (nat-cons d22 ar))]
-         [(d24of32) (some (nat-cons d23 ar))]
-         [(d25of32) (some (nat-cons d24 ar))]
-         [(d26of32) (some (nat-cons d25 ar))]
-         [(d27of32) (some (nat-cons d26 ar))]
-         [(d28of32) (some (nat-cons d27 ar))]
-         [(d29of32) (some (nat-cons d28 ar))]
-         [(d30of32) (some (nat-cons d29 ar))]
-         [(d31of32) (some (nat-cons d30 ar))])])))
+       (match-adt Maybe (?digit-sub1 a0)
+         [(none)
+          (match-adt Maybe (?sub1 ar)
+            [(none) (none)]
+            [(some ar-1) (some (nat-cons* d31 ar-1))])]
+         [(some a0-1)
+          (some (nat-cons* a0-1 ar))])])))
 
+;; ?digit-sub1 : Digit -> (Maybe Digit)
+(define ?digit-sub1
+  (λ (d)
+    (match-adt Digit d
+      [(d00of32) (none)]
+      [(d01of32) (some d00)]
+      [(d02of32) (some d01)]
+      [(d03of32) (some d02)]
+      [(d04of32) (some d03)]
+      [(d05of32) (some d04)]
+      [(d06of32) (some d05)]
+      [(d07of32) (some d06)]
+      [(d08of32) (some d07)]
+      [(d09of32) (some d08)]
+      [(d10of32) (some d09)]
+      [(d11of32) (some d10)]
+      [(d12of32) (some d11)]
+      [(d13of32) (some d12)]
+      [(d14of32) (some d13)]
+      [(d15of32) (some d14)]
+      [(d16of32) (some d15)]
+      [(d17of32) (some d16)]
+      [(d18of32) (some d17)]
+      [(d19of32) (some d18)]
+      [(d20of32) (some d19)]
+      [(d21of32) (some d20)]
+      [(d22of32) (some d21)]
+      [(d23of32) (some d22)]
+      [(d24of32) (some d23)]
+      [(d25of32) (some d24)]
+      [(d26of32) (some d25)]
+      [(d27of32) (some d26)]
+      [(d28of32) (some d27)]
+      [(d29of32) (some d28)]
+      [(d30of32) (some d29)]
+      [(d31of32) (some d30)])))
+
+;; full-adder : Digit Digit Digit -> (Pair Digit Digit)
 (define full-adder
   (λ (a b c)
     (λ (pair)
@@ -605,6 +643,7 @@
                            [(0-bit) d01]
                            [(1-bit) d02])])))))))))
 
+;; half-adder : Digit Digit -> (Pair Digit Bit)
 (define half-adder
   (λ (a b)
     (λ (pair)

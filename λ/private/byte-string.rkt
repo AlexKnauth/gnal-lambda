@@ -9,7 +9,7 @@
 
 (require "boolean.rkt"
          "byte.rkt"
-         "natural.rkt"
+         "base-32-natural.rkt"
          "maybe.rkt"
          "vector.rkt"
          )

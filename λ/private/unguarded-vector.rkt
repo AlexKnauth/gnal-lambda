@@ -17,16 +17,14 @@
 
 (require "boolean.rkt"
          "maybe.rkt"
-         "natural.rkt"
+         "base-32-natural.rkt"
          "v32.rkt"
+         
          )
 
 ;; BRANCHING-FACTOR = 2^5 = 32
-(define BRANCHING-FACTOR (^ n2 n5))
-(define BRANCHING-FACTOR-1
-  (match-adt Natural BRANCHING-FACTOR
-    [(zero) (zero)]
-    [(succ BRANCHING-FACTOR-1) BRANCHING-FACTOR-1]))
+(define BRANCHING-FACTOR n32)
+(define BRANCHING-FACTOR-1/digit d31)
 
 (define ??? (λ (f) (f)))
 (define v32???
@@ -187,23 +185,23 @@
 
 ;; unguarded-vector-nth : Natural (Unguarded-Vectorof A d) Natural -> A
 (define unguarded-vector-nth
-  (λ (length tree i)
-    (match-adt Natural length
+  (λ (n tree i)
+    (match-adt Natural n
       [(zero) ???]
-      [(succ length-1)
-       (match-adt Natural length-1
-         [(zero) tree]
-         [(succ length-2)
+      [(nat-cons n0 n-rest)
+       (match-adt Boolean (and (d01? n0) (zero? n-rest))
+         [(true) tree]
+         [(false)
           (match-adt VNode tree
             [(vnode sub tail)
-             (let ([lq (quotient length BRANCHING-FACTOR)]
-                   [iq (quotient i BRANCHING-FACTOR)]
-                   [ir (remainder i BRANCHING-FACTOR)])
+             (let ([lq (quotient32 n)]
+                   [iq (quotient32 i)]
+                   [ir (remainder32->digit i)])
                (match-adt Boolean (natural=? iq lq)
                  [(true)
-                  (v32-nth tail ir)]
+                  (v32-nth/digit tail ir)]
                  [(false)
-                  (v32-nth (unguarded-vector-nth lq sub iq) ir)]))])])])))
+                  (v32-nth/digit (unguarded-vector-nth lq sub iq) ir)]))])])])))
 
 ;; unguarded-vector-ref : Natural (Unguarded-Vectorof A d) Natural -> (Maybe Byte)
 (define unguarded-vector-ref
@@ -211,34 +209,33 @@
     (match-adt Maybe (?∆ i n)
       [(none) (none)]
       [(some i∆n)
-       (match-adt Natural i∆n
-         [(zero) (none)]
-         [(succ i∆n-1)
-          (some (unguarded-vector-nth n v i))])])))
+       (match-adt Boolean (zero? i∆n)
+         [(true) (none)]
+         [(false) (some (unguarded-vector-nth n v i))])])))
 
 ;; unguarded-vector-conj : Natural (Unguarded-Vectorof A old-d) A -> (Unguarded-Vectorof new-d)
 (define unguarded-vector-conj
-  (λ (length node a)
-    (match-adt Natural length
+  (λ (n node a)
+    (match-adt Natural n
       [(zero)
        a]
-      [(succ length-1)
-       (match-adt Natural length-1
-         [(zero)
+      [(nat-cons n0 n-rest)
+       (match-adt Boolean (and (d01? n0) (zero? n-rest))
+         [(true)
           (vnode ???
                  (make-v32/2 node a ???))]
-         [(succ length-2)
+         [(false)
           (match-adt VNode node
             [(vnode tree tail)
-             (match-adt Natural (remainder (add1 length) BRANCHING-FACTOR)
-               [(zero)
+             (match-adt Maybe (?digit-sub1 (remainder32->digit (add1 n)))
+               [(none)
                 (vnode (unguarded-vector-conj
-                         (quotient length BRANCHING-FACTOR)
+                         (quotient32 n)
                          tree
-                         (v32-conj BRANCHING-FACTOR-1 tail a))
-                       (make-v32 ???))]
-               [(succ r)
-                (vnode tree (v32-conj r tail a))])])])])))
+                         (v32-conj/digit BRANCHING-FACTOR-1/digit tail a))
+                       v32???)]
+               [(some r)
+                (vnode tree (v32-conj/digit r tail a))])])])])))
 
 ;; make-unguarded-vector : Natural A -> (Unguarded-Vectorof A d)
 (define make-unguarded-vector
@@ -287,14 +284,14 @@
 ;; (vlength->depth 2047) = 2
 ;; (vlength->depth 2048) = 3
 (define vlength->depth
-  (λ (n)
-    (match-adt Natural n
+  (λ (a)
+    (match-adt Natural a
       [(zero) n0]
-      [(succ n-1)
-       (match-adt Natural n-1
-         [(zero) n0]
-         [(succ n-2)
-          (add1 (vlength->depth (quotient n BRANCHING-FACTOR)))])])))
+      [(nat-cons a0 ar)
+       (match-adt Boolean (and (d01? a0) (zero? ar))
+         [(true) n0]
+         [(false)
+          (add1 (vlength->depth (quotient32 a)))])])))
 
 ;; build-unguarded-vector/acc : Natural [Natural -> A] Natural (Unguarded-Vectorof A depth)
 ;; i must be less than or equal to n

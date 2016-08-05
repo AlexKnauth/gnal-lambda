@@ -115,7 +115,7 @@
 
 (define (rkt->b32-natural n)
   (unless (exact-nonnegative-integer? n)
-    (error 'rkt->natural "expected a racket natural number, given ~v" n))
+    (error 'rkt->b32-natural "expected a racket natural number, given ~v" n))
   (let loop ([acc -b32-n0] [n n])
     (cond [(zero? n) acc]
           [else (loop (-b32-add1 acc) (sub1 n))])))
@@ -139,9 +139,9 @@
 
 (define ((vector->rkt elem->rkt) v)
   (vector->immutable-vector
-   (build-vector (natural->rkt (-vector-length v))
+   (build-vector (b32-natural->rkt (-vector-length v))
                  (λ (i)
-                   (elem->rkt (-vector-nth v (rkt->natural i)))))))
+                   (elem->rkt (-vector-nth v (rkt->b32-natural i)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -161,8 +161,8 @@
 (define byte-string->rkt
   (-byte-string->rkt
    byte->rkt
-   natural->rkt
-   rkt->natural
+   b32-natural->rkt
+   rkt->b32-natural
    build-bytes
    (λ (i) (error 'byte-string->rkt "bad index: ~v" i))))
 
@@ -177,6 +177,7 @@
            check-bit=?
            check-byte=?
            check-natural=?
+           check-b32-natural=?
            check-vector=?
            )
   (require (only-in rackunit define-check define-binary-check
@@ -193,6 +194,8 @@
     (boolean->rkt (-byte=? actual expected)))
   (define-binary-check (check-natural=? actual expected)
     (boolean->rkt (-natural=? actual expected)))
+  (define-binary-check (check-b32-natural=? actual expected)
+    (boolean->rkt (-b32-natural=? actual expected)))
   (define-check (check-vector=? elem=? actual expected)
     (with-check-info*
      (list (make-check-actual actual)
@@ -266,6 +269,7 @@
         (check-equal? (natural->rkt (-quotient -a -b)) (quotient a b))
         (check-equal? (natural->rkt (-remainder -a -b)) (remainder a b)))
       (check-equal? (b32-natural->rkt (-b32-+ -b32-a -b32-b)) (+ a b))
+      (check-equal? (b32-natural->rkt (-b32-add1 -b32-a)) (add1 a))
       (check-equal? ((-?∆ -a -b)
                      (λ () 'none)
                      (λ (a∆b) (natural->rkt a∆b)))
@@ -329,16 +333,22 @@
                     ((rkt->vector rkt->natural) (vector-immutable 0))
                     (-vector-conj -empty-vector -n0))
     (for ([n (in-list (list 31 33 63 65 1023 1025))])
-      (define -n (rkt->natural n))
+      (define -n (rkt->b32-natural n))
       (define v (build-vector n (λ (i) (random n))))
       (define v1 ((rkt->vector (λ (x) x)) v))
-      (define v2 (-build-vector -n (λ (i) (vector-ref v (natural->rkt i)))))
+      (define v2 (-build-vector -n (λ (i) (vector-ref v (b32-natural->rkt i)))))
+      (check-equal? (b32-natural->rkt (-vector-length v1)) n)
+      (check-equal? (b32-natural->rkt (-vector-length v2)) n)
+      (check-equal? ((vector->rkt (λ (x) x)) v1) v)
+      (check-equal? ((vector->rkt (λ (x) x)) v2) v)
       (check-vector=? (compose rkt->boolean equal?) v1 v2)
+      (check-b32-natural=? (-vector-length (-vector-append v2 v2))
+                           (-b32-+ -n -n))
       (check-vector=? (compose rkt->boolean equal?)
                       (-vector-append v2 v2)
                       ((rkt->vector (λ (x) x)) (vector-append v v)))
       (for ([i (in-range n)])
-        (define natural-i (rkt->natural i))
+        (define natural-i (rkt->b32-natural i))
         (check-equal? (-vector-nth v1 natural-i)
                       (vector-ref v i))
         (check-equal? (-vector-nth v2 natural-i)

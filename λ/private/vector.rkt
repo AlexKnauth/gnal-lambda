@@ -20,7 +20,7 @@
 
 (require "boolean.rkt"
          "maybe.rkt"
-         "natural.rkt"
+         "base-32-natural.rkt"
          "v32.rkt"
          "unguarded-vector.rkt"
          )
@@ -58,9 +58,9 @@
 (define vector-conj
   (λ (v a)
     (match-adt Vector v
-      [(vector-internal length node)
+      [(vector-internal length tree)
        (vector-internal (add1 length)
-         (unguarded-vector-conj length node a))])))
+         (unguarded-vector-conj length tree a))])))
 
 ;; make-vector : Natural A -> (Vectorof A)
 (define make-vector
