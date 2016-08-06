@@ -13,7 +13,7 @@
           (combine-in
            (file "../../../λ/private/boolean.rkt")
            (file "../../../λ/private/byte.rkt")
-           (file "../../../λ/private/natural.rkt")
+           (file "../../../λ/private/unary-natural.rkt")
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
            (file "../../../λ/private/vector.rkt")

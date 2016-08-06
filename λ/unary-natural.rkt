@@ -11,7 +11,7 @@
          "../gnal-lambda/trait/trait.rkt"
          "trait/show.rkt"
          "trait/equal.rkt"
-         "private/natural.rkt")
+         "private/unary-natural.rkt")
 
 ;; show-Natural : Natural -> Byte-String
 (define show-Natural
