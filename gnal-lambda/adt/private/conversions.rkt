@@ -17,6 +17,7 @@
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
            (file "../../../λ/private/vector.rkt")
+           (prefix-in b2- (file "../../../λ/private/base-2-natural.rkt"))
            (prefix-in b32- (file "../../../λ/private/base-32-natural.rkt"))
            )))
 
@@ -87,6 +88,25 @@
 
 (define natural->rkt
   (-natural->rkt 0 add1))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Base 2 Natural
+
+(define (rkt->b2-natural n)
+  (unless (exact-nonnegative-integer? n)
+    (error 'rkt->b2-natural "expected a racket natural number, given ~v" n))
+  (let loop ([acc -b2-n0] [n n])
+    (cond [(zero? n) acc]
+          [else (loop (-b2-add1 acc) (sub1 n))])))
+
+(define (b2-natural->rkt n)
+  (let loop ([sum 0] [place 1] [n n])
+    (n (λ () sum)
+       (λ (d rest)
+         (loop (+ sum (* place (bit->rkt d)))
+               (* place 2)
+               rest)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -256,6 +276,7 @@
   (test-case "natural numbers"
     (for ([n (in-range 100)])
       (check-equal? (natural->rkt (rkt->natural n)) n)
+      (check-equal? (b2-natural->rkt (rkt->b2-natural n)) n)
       (check-equal? (b32-natural->rkt (rkt->b32-natural n)) n))
     (for* ([a (in-range 10)]
            [b (in-range 6)])
@@ -270,6 +291,25 @@
       (check-equal? ((-?∆ -a -b)
                      (λ () 'none)
                      (λ (a∆b) (natural->rkt a∆b)))
+                    (if (<= a b) (- b a) 'none))
+      )
+    (for* ([a (in-range 130)]
+           [b (in-range 70)])
+      (define -a (rkt->b2-natural a))
+      (define -b (rkt->b2-natural b))
+      (check-equal? (b2-natural->rkt (-b2-+ -a -b)) (+ a b))
+      (check-equal? (b2-natural->rkt (-b2-+ -b -a)) (+ b a))
+      (check-equal? (b2-natural->rkt (-b2-add1 -a)) (add1 a))
+      (check-equal? (b2-natural->rkt (-b2-quotient2 -a)) (quotient a 2))
+      (check-equal? (b2-natural->rkt (-b2-remainder2 -a)) (remainder a 2))
+      (check-equal? (bit->rkt (-b2-remainder2->bit -a)) (remainder a 2))
+      (check-equal? ((-b2-?sub1 -a)
+                     (λ () 'none)
+                     (λ (a-1) (b2-natural->rkt a-1)))
+                    (if (zero? a) 'none (sub1 a)))
+      (check-equal? ((-b2-?∆ -a -b)
+                     (λ () 'none)
+                     (λ (a∆b) (b2-natural->rkt a∆b)))
                     (if (<= a b) (- b a) 'none))
       )
     (for* ([a (in-range 130)]
