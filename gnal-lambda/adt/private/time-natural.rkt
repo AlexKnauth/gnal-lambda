@@ -9,17 +9,17 @@
 (define b1-nats (build-vector 2000 rkt->natural))
 (define b2-nats (build-vector 2000 rkt->b2-natural))
 (define b32-nats (build-vector 2000 rkt->b32-natural))
-(collect-garbage 'major)
+(collect-garbage)
 (time
  (for* ([a (in-vector b1-nats)]
         [b (in-vector b1-nats)])
    (b1+ a b)))
-(collect-garbage 'major)
+(collect-garbage)
 (time
  (for* ([a (in-vector b2-nats)]
         [b (in-vector b2-nats)])
    (b2+ a b)))
-(collect-garbage 'major)
+(collect-garbage)
 (time
  (for* ([a (in-vector b32-nats)]
         [b (in-vector b32-nats)])
