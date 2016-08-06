@@ -2,6 +2,8 @@
 
 (provide rkt->boolean boolean->rkt
          rkt->natural natural->rkt
+         rkt->b2-natural b2-natural->rkt
+         rkt->b32-natural b32-natural->rkt
          rkt->bit bit->rkt
          rkt->byte byte->rkt
          rkt->byte-string byte-string->rkt
