@@ -5,17 +5,11 @@
 (require "../gnal-lambda/show-adt.rkt"
          "../gnal-lambda/trait/trait.rkt"
          "private/boolean.rkt"
+         "private/list.rkt"
          "trait/show.rkt"
          "trait/equal.rkt"
          "trait/functor.rkt"
          )
-
-;; A (Listof A) is one of:
-;;  - (empty)
-;;  - (cons A (Listof A))
-(define-adt List
-  (empty)
-  (cons first rest))
 
 (define map-List
   (λ (f lst)
@@ -32,19 +26,7 @@
 
 (define equal?-Listof
   (λ (A)
-    (λ (as bs)
-      (match-adt List as
-        [(empty)
-         (match-adt List bs
-           [(empty) (true)]
-           [(cons b bs) (false)])]
-        [(cons a as)
-         (match-adt List bs
-           [(empty) (false)]
-           [(cons b bs)
-            (match-adt Boolean ((equal? A) a b)
-              [(true) ((equal?-Listof A) as bs)]
-              [(false) (false)])])]))))
+    (list=? (equal? A))))
 
 (define Listof
   (λ (A)
