@@ -1,4 +1,4 @@
-gnal-lambda
+gnal-lambda [![Build Status](https://travis-ci.org/AlexKnauth/gnal-lambda.png?branch=master)](https://travis-ci.org/AlexKnauth/gnal-lambda)
 ===
 
 A racket language based on lambda calculus + sugar for ADTs and IO.
