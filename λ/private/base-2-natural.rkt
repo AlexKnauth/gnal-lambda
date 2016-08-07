@@ -7,6 +7,8 @@
          quotient2
          remainder2
          remainder2->bit
+         quotient32
+         remainder32
          n0 n1 n2 n3 n4 n5 n6 n7 n8 n9 n10 n11 n12 n13 n14 n15
          n16 n17 n18 n19 n20 n21 n22 n23 n24 n25 n26 n27 n28 n29 n30 n31
          n32
@@ -97,6 +99,38 @@
       [(zero) d0]
       [(nat-cons a0 ar) a0])))
 
+;; quotient4 : Natural -> Natural
+(define quotient4
+  (λ (a) (natural-drop a n2)))
+
+;; remainder4 : Natural -> Natural
+(define remainder4
+  (λ (a) (natural-take a n2)))
+
+;; quotient8 : Natural -> Natural
+(define quotient8
+  (λ (a) (natural-drop a n3)))
+
+;; remainder8 : Natural -> Natural
+(define remainder8
+  (λ (a) (natural-take a n3)))
+
+;; quotient16 : Natural -> Natural
+(define quotient16
+  (λ (a) (natural-drop a n4)))
+
+;; remainder16 : Natural -> Natural
+(define remainder16
+  (λ (a) (natural-take a n4)))
+
+;; quotient32 : Natural -> Natural
+(define quotient32
+  (λ (a) (natural-drop a n5)))
+
+;; remainder32 : Natural -> Natural
+(define remainder32
+  (λ (a) (natural-take a n5)))
+
 ;; +/carry : Natural Natural Digit -> Natural
 (define +/carry
   (λ (a b carry)
@@ -184,6 +218,24 @@
          (match-adt Bit b
            [(0-bit) (pair d1 d0)]
            [(1-bit) (pair d0 d1)])]))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; natural-drop : Natural Natural -> Natural
+(define natural-drop
+  (λ (a n)
+    (match-adt Maybe (?sub1 n)
+      [(none) a]
+      [(some n-1)
+       (natural-drop (quotient2 a) n-1)])))
+
+;; natural-take : Natural Natural -> Natural
+(define natural-take
+  (λ (a n)
+    (match-adt Maybe (?sub1 n)
+      [(none) n0]
+      [(some n-1)
+       (nat-cons* (remainder2->bit a) (natural-take (quotient2 a) n-1))])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

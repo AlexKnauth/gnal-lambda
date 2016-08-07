@@ -305,6 +305,8 @@
       (check-equal? (b2-natural->rkt (-b2-quotient2 -a)) (quotient a 2))
       (check-equal? (b2-natural->rkt (-b2-remainder2 -a)) (remainder a 2))
       (check-equal? (bit->rkt (-b2-remainder2->bit -a)) (remainder a 2))
+      (check-equal? (b2-natural->rkt (-b2-quotient32 -a)) (quotient a 32))
+      (check-equal? (b2-natural->rkt (-b2-remainder32 -a)) (remainder a 32))
       (check-equal? ((-b2-?sub1 -a)
                      (λ () 'none)
                      (λ (a-1) (b2-natural->rkt a-1)))
