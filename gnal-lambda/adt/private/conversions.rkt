@@ -19,6 +19,7 @@
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
            (file "../../../λ/private/vector.rkt")
+           (prefix-in b2- (file "../../../λ/private/pair-tree.rkt"))
            (prefix-in b2- (file "../../../λ/private/base-2-natural.rkt"))
            (prefix-in b32- (file "../../../λ/private/base-32-natural.rkt"))
            )))
@@ -167,6 +168,21 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; Pair Trees (base 2 vectors)
+
+(define ((rkt->b2-vector rkt->elem) v)
+  (for/fold ([acc -b2-empty-vector])
+            ([a (in-vector v)])
+    (-b2-vector-conj acc (rkt->elem a))))
+
+(define ((b2-vector->rkt elem->rkt) v)
+  (vector->immutable-vector
+   (build-vector (b2-natural->rkt (-b2-vector-length v))
+                 (λ (i)
+                   (elem->rkt (-b2-vector-nth v (rkt->b2-natural i)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 ;; Byte-String
 
 (define (rkt->byte-string bstr)
@@ -199,8 +215,10 @@
            check-bit=?
            check-byte=?
            check-natural=?
+           check-b2-natural=?
            check-b32-natural=?
            check-vector=?
+           check-b2-vector=?
            )
   (require (only-in rackunit define-check define-binary-check
                     with-check-info* make-check-actual make-check-expected))
@@ -216,6 +234,8 @@
     (boolean->rkt (-byte=? actual expected)))
   (define-binary-check (check-natural=? actual expected)
     (boolean->rkt (-natural=? actual expected)))
+  (define-binary-check (check-b2-natural=? actual expected)
+    (boolean->rkt (-b2-natural=? actual expected)))
   (define-binary-check (check-b32-natural=? actual expected)
     (boolean->rkt (-b32-natural=? actual expected)))
   (define-check (check-vector=? elem=? actual expected)
@@ -224,6 +244,12 @@
            (make-check-expected expected))
      (λ ()
        (check-true ((-vector=? elem=?) actual expected)))))
+  (define-check (check-b2-vector=? elem=? actual expected)
+    (with-check-info*
+     (list (make-check-actual actual)
+           (make-check-expected expected))
+     (λ ()
+       (check-true ((-b2-vector=? elem=?) actual expected)))))
   )
 
 (module+ test
@@ -407,6 +433,55 @@
         (check-equal? (-vector-nth v1 natural-i)
                       (vector-ref v i))
         (check-equal? (-vector-nth v2 natural-i)
+                      (vector-ref v i))))
+    )
+  (test-case "pair trees"
+    (check-equal? ((b2-vector->rkt (λ (x) x))
+                   -b2-empty-vector)
+                  (vector-immutable))
+    (check-equal? ((b2-vector->rkt (λ (x) x))
+                   (-b2-vector-conj -b2-empty-vector 'partridge))
+                  (vector-immutable 'partridge))
+    (check-equal? (-b2-vector-nth (-b2-vector-conj -b2-empty-vector 'partridge)
+                                  -b2-n0)
+                  'partridge)
+    (check-b2-vector=? -natural=? -b2-empty-vector -b2-empty-vector)
+    (check-b2-vector=? -natural=?
+                       (-b2-vector-conj -b2-empty-vector -n0)
+                       (-b2-vector-conj -b2-empty-vector -n0))
+    (check-b2-vector=? (compose rkt->boolean equal?)
+                       (-b2-vector-conj -b2-empty-vector 0)
+                       (-b2-vector-conj -b2-empty-vector 0))
+    (check-equal? ((b2-vector->rkt natural->rkt) -b2-empty-vector)
+                  (vector-immutable))
+    (check-equal? ((b2-vector->rkt natural->rkt) (-b2-vector-conj -b2-empty-vector -n0))
+                  (vector-immutable 0))
+    (check-b2-vector=? -natural=?
+                       ((rkt->b2-vector rkt->natural) (vector-immutable))
+                       -b2-empty-vector)
+    (check-b2-vector=? -natural=?
+                       ((rkt->b2-vector rkt->natural) (vector-immutable 0))
+                       (-b2-vector-conj -b2-empty-vector -n0))
+    (for ([n (in-list (list 31 33 63 65 1023 1025))])
+      (define -n (rkt->b2-natural n))
+      (define v (build-vector n (λ (i) (random n))))
+      (define v1 ((rkt->b2-vector (λ (x) x)) v))
+      (define v2 (-b2-build-vector -n (λ (i) (vector-ref v (b2-natural->rkt i)))))
+      (check-equal? (b2-natural->rkt (-b2-vector-length v1)) n)
+      (check-equal? (b2-natural->rkt (-b2-vector-length v2)) n)
+      (check-equal? ((b2-vector->rkt (λ (x) x)) v1) v)
+      (check-equal? ((b2-vector->rkt (λ (x) x)) v2) v)
+      (check-b2-vector=? (compose rkt->boolean equal?) v1 v2)
+      (check-b2-natural=? (-b2-vector-length (-b2-vector-append v2 v2))
+                          (-b2-+ -n -n))
+      (check-b2-vector=? (compose rkt->boolean equal?)
+                         (-b2-vector-append v2 v2)
+                         ((rkt->b2-vector (λ (x) x)) (vector-append v v)))
+      (for ([i (in-range n)])
+        (define natural-i (rkt->b2-natural i))
+        (check-equal? (-b2-vector-nth v1 natural-i)
+                      (vector-ref v i))
+        (check-equal? (-b2-vector-nth v2 natural-i)
                       (vector-ref v i))))
     )
   )
