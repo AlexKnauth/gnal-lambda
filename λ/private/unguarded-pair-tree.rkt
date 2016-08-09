@@ -11,7 +11,7 @@
          unguarded-vector-conj
          unguarded-vector-nth
          unguarded-vector-ref
-         ;TODO: unguarded-vector-set-nth
+         unguarded-vector-set-nth
          unguarded-vector-append
          )
 
@@ -135,6 +135,36 @@
                   (pair-ref/bit tail ir)]
                  [(false)
                   (pair-ref/bit (unguarded-vector-nth lq sub iq) ir)]))])])])))
+
+;; unguarded-vector-set-nth : Natural (Unguarded-Vectorof A d) Natural A -> (Unguarded-Vectorof A d)
+(define unguarded-vector-set-nth
+  (λ (n tree i a)
+    (match-adt Natural n
+      [(zero) tree]
+      [(nat-cons n0 n-rest)
+       (match-adt Boolean (and (1-bit? n0) (zero? n-rest))
+         [(true) (match-adt Boolean (zero? i)
+                   [(true) a]
+                   [(false) tree])]
+         [(false)
+          (match-adt VNode tree
+            [(vnode sub tail)
+             (let ([lq (quotient2 n)]
+                   [iq (quotient2 i)]
+                   [ir (remainder2->bit i)])
+               (match-adt Boolean (natural=? iq lq)
+                 [(true)
+                  (vnode sub
+                         (pair-set/bit tail ir))]
+                 [(false)
+                  (vnode (unguarded-vector-update-nth lq sub iq
+                           (λ (p) (pair-set/bit p ir a)))
+                         tail)]))])])])))
+
+;; unguarded-vector-update-nth : Natural (Unguarded-Vectorof A d) Natural [A -> A] -> (Unguarded-Vectorof A d)
+(define unguarded-vector-update-nth
+  (λ (n tree i f)
+    (unguarded-vector-set-nth n tree i (f (unguarded-vector-nth n tree i)))))
 
 ;; unguarded-vector-ref : Natural (Unguarded-Vectorof A d) Natural -> (Maybe Byte)
 (define unguarded-vector-ref

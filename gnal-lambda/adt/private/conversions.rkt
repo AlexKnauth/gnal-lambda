@@ -445,6 +445,14 @@
     (check-equal? (-b2-vector-nth (-b2-vector-conj -b2-empty-vector 'partridge)
                                   -b2-n0)
                   'partridge)
+    (define five-golden-rings
+      (-b2-make-vector -b2-n5 'golden-ring))
+    (check-equal? ((b2-vector->rkt (λ (x) x))
+                   (-b2-vector-set-nth
+                    five-golden-rings
+                    -b2-n3
+                    'partridge))
+                  (vector-immutable 'golden-ring 'golden-ring 'golden-ring 'partridge 'golden-ring))
     (check-b2-vector=? -natural=? -b2-empty-vector -b2-empty-vector)
     (check-b2-vector=? -natural=?
                        (-b2-vector-conj -b2-empty-vector -n0)
