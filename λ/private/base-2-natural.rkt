@@ -2,7 +2,7 @@
 
 (provide Natural natural=?
          zero nat-cons zero?
-         + add1
+         + * add1 *2
          ?∆ ?sub1
          quotient2
          remainder2
@@ -72,10 +72,37 @@
   (λ (a)
     (+/digit a d1)))
 
+;; *2 : Natural -> Natural
+(define *2
+  (λ (a)
+    (nat-cons* d0 a)))
+
+;; *4 : Natural -> Natural
+(define *4
+  (λ (a)
+    (*2 (*2 a))))
+
 ;; + : Natural Natural -> Natural
 (define +
   (λ (a b)
     (+/carry a b d0)))
+
+;; * : Natural Natural -> Natural
+(define *
+  (λ (a b)
+    (match-adt Natural a
+      [(zero) n0]
+      [(nat-cons ar aq)
+       (match-adt Natural b
+         [(zero) n0]
+         [(nat-cons br bq)
+          (+
+           (+
+            (+
+             (*/digits ar br)
+             (*2 (*/digit bq ar)))
+            (*2 (*/digit aq br)))
+           (*4 (* aq bq)))])])))
 
 ;; quotient2 : Natural -> Natural
 (define quotient2
@@ -156,6 +183,23 @@
           (match-adt Bit ad-carry
             [(0-bit) (nat-cons* ad0 ar)]
             [(1-bit) (nat-cons ad0 (+/digit ar d1))])))])))
+
+;; */digits : Digit Digit -> Natural
+(define */digits
+  (λ (a b)
+    (match-adt Bit a
+      [(0-bit) n0]
+      [(1-bit)
+       (match-adt Bit b
+         [(0-bit) n0]
+         [(1-bit) n1])])))
+
+;; */digit : Natural Digit -> Natural
+(define */digit
+  (λ (a b)
+    (match-adt Bit b
+      [(0-bit) n0]
+      [(1-bit) a])))
 
 ;; ?∆ : Natural Natural -> (Maybe Natural)
 ;; (?∆ a b) contains b - a when a < b, none otherwise
