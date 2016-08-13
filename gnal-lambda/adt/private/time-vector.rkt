@@ -21,6 +21,12 @@
 (time
  (for ([a (in-vector b2-nats)])
    (b2vector-nth v2 a)))
+(time
+ (for ([a (in-vector b2-nats)])
+   (b2vector-set-nth v2 a 'partridge)))
+(time
+ (for/and ([a (in-vector b2-nats)])
+   (eq? (b2vector-nth (b2vector-set-nth v2 a 'partridge) a) 'partridge)))
 
 ;; Base 32
 (collect-garbage)
@@ -32,4 +38,10 @@
 (time
  (for ([a (in-vector b32-nats)])
    (b32vector-nth v32 a)))
+(time
+ (for ([a (in-vector b32-nats)])
+   (b32vector-set-nth v32 a 'partridge)))
+(time
+ (for/and ([a (in-vector b32-nats)])
+   (eq? (b32vector-nth (b32vector-set-nth v32 a 'partridge) a) 'partridge)))
 

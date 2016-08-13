@@ -155,7 +155,7 @@
                (match-adt Boolean (natural=? iq lq)
                  [(true)
                   (vnode sub
-                         (pair-set/bit tail ir))]
+                         (pair-set/bit tail ir a))]
                  [(false)
                   (vnode (unguarded-vector-update-nth lq sub iq
                            (λ (p) (pair-set/bit p ir a)))

@@ -14,7 +14,7 @@
          ;; Sequence
          vector-nth
          vector-ref
-         ;vector-set-nth
+         vector-set-nth
          vector-append
          )
 
@@ -46,6 +46,13 @@
     (match-adt Vector v
       [(vector-internal length tree)
        (unguarded-vector-nth length tree i)])))
+
+;; vector-set-nth : (Vectorof A) Natural A -> (Vectorof A)
+(define vector-set-nth
+  (λ (v i a)
+    (match-adt Vector v
+      [(vector-internal length tree)
+       (vector-internal length (unguarded-vector-set-nth length tree i a))])))
 
 ;; vector-ref : (Vectorof A) Natural -> (Maybe Byte)
 (define vector-ref

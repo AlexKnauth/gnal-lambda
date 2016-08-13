@@ -398,6 +398,23 @@
                      (-false))
     )
   (test-case "vectors"
+    (check-equal? ((vector->rkt (λ (x) x))
+                   -empty-vector)
+                  (vector-immutable))
+    (check-equal? ((vector->rkt (λ (x) x))
+                   (-vector-conj -empty-vector 'a))
+                  (vector-immutable 'a))
+    (check-equal? (-vector-nth (-vector-conj -b2-empty-vector 'a)
+                               -b32-n0)
+                  'a)
+    (define five-as
+      (-make-vector -b32-n5 'a))
+    (check-equal? ((vector->rkt (λ (x) x))
+                   (-vector-set-nth
+                    five-as
+                    -b32-n3
+                    'b))
+                  (vector-immutable 'a 'a 'a 'b 'a))
     (check-vector=? -natural=? -empty-vector -empty-vector)
     (check-vector=? -natural=? (-vector-conj -empty-vector -n0) (-vector-conj -empty-vector -n0))
     (check-vector=? (compose rkt->boolean equal?)
