@@ -2,6 +2,7 @@
 
 (require "../../gnal-lambda/show-adt.rkt"
          "../../gnal-lambda/trait/trait.rkt"
+         "../../gnal-lambda/adt/private/quote-srcloc.rkt"
          "../trait/show.rkt"
          "../trait/functor.rkt"
          "../byte.rkt"
@@ -37,3 +38,4 @@
   (λ (bstr)
     (display-byte-string (byte-string-append bstr bstr)))))
 
+(display-byte-string (quote-srcloc-source here))
