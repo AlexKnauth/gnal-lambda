@@ -19,6 +19,7 @@
            (file "../../../λ/private/byte-string.rkt")
            (file "../../../λ/private/v32.rkt")
            (file "../../../λ/private/vector.rkt")
+           (file "../../../λ/private/srcloc.rkt")
            (prefix-in b2- (file "../../../λ/private/pair-tree.rkt"))
            (prefix-in b2- (file "../../../λ/private/base-2-natural.rkt"))
            (prefix-in b32- (file "../../../λ/private/base-32-natural.rkt"))
@@ -203,6 +204,13 @@
    rkt->b32-natural
    build-bytes
    (λ (i) (error 'byte-string->rkt "bad index: ~v" i))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Srcloc
+
+(define srcloc->rkt
+  (-srcloc->rkt make-srcloc byte-string->rkt b2-natural->rkt))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -511,5 +519,9 @@
                       (vector-ref v i))
         (check-equal? (-b2-vector-nth v2 natural-i)
                       (vector-ref v i))))
+    )
+  (test-case "srcloc"
+    (check-equal? (srcloc->rkt (-srcloc -empty-byte-string -b2-n1 -b2-n0 -b2-n1 -b2-n5))
+                  (srcloc #"" 1 0 1 5))
     )
   )
