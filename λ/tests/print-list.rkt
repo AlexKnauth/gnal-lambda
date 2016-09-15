@@ -3,10 +3,13 @@
 (require "../../gnal-lambda/show-adt.rkt"
          "../../gnal-lambda/trait/trait.rkt"
          "../../gnal-lambda/adt/private/quote-srcloc.rkt"
+         "../../gnal-lambda/adt/private/byte-string-literal.rkt"
          "../trait/show.rkt"
          "../trait/functor.rkt"
          "../byte.rkt"
          "../list.rkt"
+         "../boolean.rkt"
+         "../unary-natural.rkt"
          )
 
 (define print
@@ -39,3 +42,12 @@
     (display-byte-string (byte-string-append bstr bstr)))))
 
 (display-byte-string (quote-srcloc-source here))
+
+(define check
+  (λ (=? a b)
+    (match-adt Boolean (=? a b)
+      [(true) (display-byte-string (byte-string-literal/id success!))]
+      [(false) (display-byte-string (byte-string-literal/id test-failed!))])))
+
+(check boolean=? (true) (true))
+(check boolean=? (true) (false))
